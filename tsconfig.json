@@ -10,6 +10,12 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@constants/*": ["src/common/constants/*"],
+      "@helpers/*": ["src/common/utils/*"],
+      "@guards/*": ["src/common/guards/*"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
