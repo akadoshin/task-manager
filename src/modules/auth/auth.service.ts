@@ -6,15 +6,17 @@ import {
 
 /** external services */
 import { JwtService } from '@nestjs/jwt';
-import { TUser, UsersService } from '@/users/users.service';
+import { UsersService } from '@/modules/users/users.service';
+
+/** dto and entities */
+import { UserEntity } from '@/modules/users/entities/users.entity';
+import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
 
 /** helpers */
 import { UserHelper } from '@helpers/user.helper';
 
-export type TAuthInput = Pick<TUser, 'nickname' | 'ip'>;
-
 type TAuthResult = {
-  userId: TUser['id'];
+  userId: UserEntity['id'];
   userNickname: string;
   accessToken: string;
 };
@@ -26,9 +28,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(
-    input: Pick<TAuthInput, 'nickname' | 'ip'>,
-  ): Promise<TUser | null> {
+  async validateUser(input: CreateUserDto): Promise<UserEntity | null> {
     /**
      * Check if the nickname has a hash
      */
@@ -37,7 +37,7 @@ export class AuthService {
     }
 
     const [nickname, hash] = input.nickname.split('#');
-    const user = await this.usersService.findOne(nickname, +hash);
+    const user = await this.usersService.findOne({ nickname, hash: +hash });
 
     /**
      * If the user is found and the IP matches,
@@ -50,9 +50,7 @@ export class AuthService {
     return null;
   }
 
-  async authenticate(
-    input: Pick<TAuthInput, 'nickname' | 'ip'>,
-  ): Promise<TAuthResult> {
+  async authenticate(input: CreateUserDto): Promise<TAuthResult> {
     const user = await this.validateUser(input);
 
     if (!user) {
@@ -62,13 +60,13 @@ export class AuthService {
     return this.signIn(user);
   }
 
-  async register(input: TAuthInput): Promise<TAuthResult> {
-    const user = await this.usersService.create(input.nickname, input.ip);
+  async register(input: CreateUserDto): Promise<TAuthResult> {
+    const user = await this.usersService.create(input);
 
     return this.signIn(user);
   }
 
-  async signIn(input: TUser): Promise<TAuthResult> {
+  async signIn(input: UserEntity): Promise<TAuthResult> {
     const tokenPayload = {
       sub: input.id,
       nickname: UserHelper.getNicknameAndHash(input),
@@ -83,15 +81,13 @@ export class AuthService {
     };
   }
 
-  async suggestions(
-    ip: string,
-  ): Promise<Pick<TAuthInput, 'nickname'>[] | null> {
+  async suggestions(ip: string): Promise<string[] | null> {
     const users = await this.usersService.findAllByIp(ip);
 
     if (!users?.length) {
       return null;
     }
 
-    return users.map((u) => ({ nickname: UserHelper.getNicknameAndHash(u) }));
+    return users.map(UserHelper.getNicknameAndHash);
   }
 }

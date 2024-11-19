@@ -1,18 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+
+/** types */
+import { UserEntity } from './entities/users.entity';
+import { CreateUserDto } from './dto/create-user.dto';
 
 /** helpers */
 import { UserHelper } from '@helpers/user.helper';
-
-export type TUser = {
-  id: number;
-  nickname: string;
-  hash: number;
-  ip: string;
-};
+import { validate } from 'class-validator';
 
 @Injectable()
 export class UsersService {
-  private users: TUser[] = [
+  private users: UserEntity[] = [
     {
       id: 1,
       ip: '127.0.0.1',
@@ -33,30 +31,40 @@ export class UsersService {
     },
   ];
 
-  async findOne(nickname: string, hash: number): Promise<TUser | undefined> {
-    return this.users.find(
-      (u) =>
-        u.nickname === UserHelper.normalizeNickname(nickname) &&
-        u.hash === hash,
-    );
-  }
+  async create({ nickname, ip }: CreateUserDto): Promise<UserEntity> {
+    const dto = new CreateUserDto();
+    dto.nickname = nickname;
+    dto.ip = ip;
 
-  async findAllByIp(ip: string): Promise<TUser[]> {
-    return this.users.filter((u) => u.ip === ip);
-  }
+    const errors = await validate(dto);
 
-  async create(nickname: string, ip: string): Promise<TUser> {
-    const user = {
+    if (errors.length) {
+      throw new BadRequestException(errors.toString());
+    }
+
+    const user = new UserEntity({
       id: this.users.length + 1,
       hash: this.generateHash(),
       nickname: UserHelper.normalizeNickname(nickname),
       ip,
-    };
+    });
 
     this.users.push(user);
 
     return user;
   }
+
+  async findOne({
+    nickname,
+    hash,
+  }: Pick<UserEntity, 'nickname' | 'hash'>): Promise<UserEntity | undefined> {
+    return this.users.find((u) => u.nickname === nickname && u.hash === hash);
+  }
+
+  async findAllByIp(ip: string): Promise<UserEntity[]> {
+    return this.users.filter((u) => u.ip === ip);
+  }
+
   /**
    * Generate a random hash
    *

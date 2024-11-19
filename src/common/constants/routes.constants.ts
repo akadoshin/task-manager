@@ -11,6 +11,7 @@
  */
 export enum ERoutes {
   Auth = 'auth',
+  Workspaces = 'workspaces',
 }
 
 export enum EAuthRoutes {

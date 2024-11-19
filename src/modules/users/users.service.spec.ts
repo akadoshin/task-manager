@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
 
 import { UsersService } from './users.service';
+import { BadRequestException } from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -16,7 +16,11 @@ describe('UsersService', () => {
 
   describe('findOne', () => {
     it('should return an user by nickname', async () => {
-      const user = await service.findOne('akadoshin', 2342);
+      const user = await service.findOne({
+        nickname: 'akadoshin',
+        hash: 2342,
+      });
+
       expect(user).toEqual({
         id: 1,
         ip: '127.0.0.1',
@@ -26,13 +30,12 @@ describe('UsersService', () => {
     });
 
     it('should return undefined if user is not found', async () => {
-      const user = await service.findOne('none', 0);
-      expect(user).toBeUndefined();
-    });
+      const user = await service.findOne({
+        nickname: 'unknown',
+        hash: 2342,
+      });
 
-    it('validate normalization', async () => {
-      const user = await service.findOne('AkádoShiN', 2342);
-      expect(user).toHaveProperty('nickname', 'akadoshin');
+      expect(user).toBeUndefined();
     });
   });
 
@@ -45,11 +48,15 @@ describe('UsersService', () => {
 
   describe('create', () => {
     it('should create a new user', async () => {
-      const createdUser = await service.create('newUser', '127.0.0.1');
-      const user = await service.findOne(
-        createdUser.nickname,
-        createdUser.hash,
-      );
+      const createdUser = await service.create({
+        nickname: 'newUser',
+        ip: '127.0.0.1',
+      });
+
+      const user = await service.findOne({
+        nickname: createdUser.nickname,
+        hash: createdUser.hash,
+      });
 
       expect(user).toHaveProperty('hash');
 
@@ -58,6 +65,27 @@ describe('UsersService', () => {
 
       expect(user).toHaveProperty('nickname', 'newuser');
       expect(user).toHaveProperty('ip', '127.0.0.1');
+    });
+
+    it('validate normalization', async () => {
+      const user = await service.create({
+        nickname: 'AkádoShiN',
+        ip: '127.0.0.1',
+      });
+
+      expect(user).toHaveProperty('nickname', 'akadoshin');
+    });
+
+    it('should throw an error if ip is invalid', async () => {
+      await expect(
+        service.create({ nickname: 'newUser', ip: 'invalid' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw an error if nickname is invalid', async () => {
+      await expect(
+        service.create({ nickname: 'a', ip: '127.0.0.1' }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });

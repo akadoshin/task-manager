@@ -5,7 +5,7 @@ import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 /** external services */
-import { UsersService } from '@/users/users.service';
+import { UsersService } from '@/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
@@ -54,7 +54,10 @@ describe('AuthService', () => {
       const result = await authService.validateUser(input);
 
       expect(result).toEqual(user);
-      expect(mockUsersService.findOne).toHaveBeenCalledWith('testUser', 1234);
+      expect(mockUsersService.findOne).toHaveBeenCalledWith({
+        nickname: 'testUser',
+        hash: 1234,
+      });
     });
 
     it('should return null if user is not found', async () => {
@@ -65,7 +68,10 @@ describe('AuthService', () => {
       const result = await authService.validateUser(input);
 
       expect(result).toBeNull();
-      expect(mockUsersService.findOne).toHaveBeenCalledWith('testUser', 1234);
+      expect(mockUsersService.findOne).toHaveBeenCalledWith({
+        nickname: 'testUser',
+        hash: 1234,
+      });
     });
   });
 
@@ -131,10 +137,7 @@ describe('AuthService', () => {
 
       const result = await authService.suggestions(ip);
 
-      expect(result).toEqual([
-        { nickname: 'testUser1#1234' },
-        { nickname: 'testUser2#5678' },
-      ]);
+      expect(result).toEqual(['testUser1#1234', 'testUser2#5678']);
       expect(mockUsersService.findAllByIp).toHaveBeenCalledWith(ip);
     });
   });

@@ -14,10 +14,13 @@ import {
 import { EAuthRoutes, ERoutes } from '@constants/routes.constants';
 
 /** guards */
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from '../../common/guards/auth.guard';
 
 /** service */
-import { type TAuthInput, AuthService } from './auth.service';
+import { AuthService } from './auth.service';
+
+/** dto */
+import { LoginAuthDto } from './dto/login-auth.dto';
 
 @Controller(ERoutes.Auth)
 export class AuthController {
@@ -25,16 +28,15 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post(EAuthRoutes.Login)
-  login(@Body() { nickname }: Pick<TAuthInput, 'nickname'>, @Ip() ip: string) {
+  login(@Body() { nickname }: LoginAuthDto, @Ip() ip: string) {
     return this.authService.authenticate({
       nickname,
       ip,
     });
   }
 
-  @HttpCode(HttpStatus.CREATED)
   @Post(EAuthRoutes.Register)
-  register(@Body() { nickname }: TAuthInput, @Ip() ip: string) {
+  register(@Body() { nickname }: LoginAuthDto, @Ip() ip: string) {
     return this.authService.register({
       nickname,
       ip,
