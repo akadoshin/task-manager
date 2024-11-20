@@ -43,7 +43,7 @@ export class AuthService {
     return user;
   }
 
-  async validateUser(input: CreateUserDto): Promise<UserEntity> {
+  private async validateUser(input: CreateUserDto): Promise<UserEntity> {
     /**
      * Check if the nickname has a hash
      */
@@ -55,6 +55,21 @@ export class AuthService {
     const user = await this.usersService.findOne({ nickname, hash: +hash });
 
     return this.validateUserIp(user, input.ip);
+  }
+
+  private async signIn(input: UserEntity): Promise<TAuthResult> {
+    const tokenPayload = {
+      sub: input.id,
+      nickname: UserHelper.getNicknameAndHash(input),
+    };
+
+    const accessToken = await this.jwtService.signAsync(tokenPayload);
+
+    return {
+      accessToken,
+      userId: input.id,
+      userNickname: UserHelper.getNicknameAndHash(input),
+    };
   }
 
   async authenticate(input: CreateUserDto): Promise<TAuthResult> {
@@ -80,21 +95,6 @@ export class AuthService {
     });
 
     return this.signIn(updatedUser);
-  }
-
-  async signIn(input: UserEntity): Promise<TAuthResult> {
-    const tokenPayload = {
-      sub: input.id,
-      nickname: UserHelper.getNicknameAndHash(input),
-    };
-
-    const accessToken = await this.jwtService.signAsync(tokenPayload);
-
-    return {
-      accessToken,
-      userId: input.id,
-      userNickname: UserHelper.getNicknameAndHash(input),
-    };
   }
 
   async suggestions(ip: string): Promise<string[] | null> {
