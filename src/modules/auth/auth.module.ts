@@ -1,12 +1,14 @@
+import * as fs from 'node:fs';
+
 import { Module } from '@nestjs/common';
+
+/** external modules */
+import { JwtModule } from '@nestjs/jwt';
+import { UsersModule } from '@/modules/users/users.module';
 
 /** service and controller */
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-
-/** external modules */
-import { UsersModule } from '@/modules/users/users.module';
-import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   providers: [AuthService],
@@ -15,8 +17,9 @@ import { JwtModule } from '@nestjs/jwt';
     UsersModule,
     JwtModule.register({
       global: true,
-      secret: 'process.env.JWT_SECRET',
-      signOptions: { expiresIn: '1d' },
+      privateKey: fs.readFileSync(process.env.JWT_PRIVATE_KEY, 'utf8'),
+      publicKey: fs.readFileSync(process.env.JWT_PUBLIC_KEY, 'utf8'),
+      signOptions: { algorithm: 'ES256', expiresIn: '12m' },
     }),
   ],
 })

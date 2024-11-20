@@ -12,3 +12,18 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model user {
+  id        Int      @id @default(autoincrement())
+  nickname  String   @db.VarChar(15)
+  hash      Int      @unique
+  ip        String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([nickname, hash])
+}
+
+model workspaces {
+  id String @id @default(cuid())
+}

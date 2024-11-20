@@ -11,4 +11,8 @@ export class CreateUserDto implements Partial<UserEntity> {
 
   @IsIP()
   ip: string;
+
+  constructor(partial: Partial<CreateUserDto> = {}) {
+    Object.assign(this, partial);
+  }
 }
