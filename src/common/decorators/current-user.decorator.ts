@@ -7,8 +7,10 @@ type TUserDecorator = {
 
 export const CurrentUser = createParamDecorator(
   (data: keyof TUserDecorator, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
-    const user: TUserDecorator = request.user;
+    const request = ctx
+      .switchToHttp()
+      .getRequest<Record<'user', TUserDecorator>>();
+    const user = request.user;
 
     return data ? user?.[data] : user;
   },

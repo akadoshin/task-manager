@@ -19,7 +19,7 @@ import { AuthController } from './auth.controller';
       global: true,
       privateKey: fs.readFileSync(process.env.JWT_PRIVATE_KEY, 'utf8'),
       publicKey: fs.readFileSync(process.env.JWT_PUBLIC_KEY, 'utf8'),
-      signOptions: { algorithm: 'ES256', expiresIn: '12m' },
+      signOptions: { algorithm: 'ES256', expiresIn: '1d' },
     }),
   ],
 })
