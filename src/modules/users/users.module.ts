@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 
 /** database */
-import { DatabaseModule } from '@/database/database.module';
+import { PrismaModule } from '@/database/prisma.module';
 
 /** services */
 import { UsersService } from './users.service';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [PrismaModule],
   providers: [UsersService],
   exports: [UsersService],
 })

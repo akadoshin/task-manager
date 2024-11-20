@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { validate } from 'class-validator';
 
 /** prisma */
-import { PrismaService } from '@/database/prisma/prisma.service';
+import { PrismaService } from '@/database/prisma.service';
 
 /** types */
 import { UserEntity } from './entities/users.entity';
