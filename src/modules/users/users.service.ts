@@ -6,7 +6,7 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 
 /** types */
 import { UserEntity } from './entities/users.entity';
-import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 /** helpers */
 import { UserHelper } from '@helpers/user.helper';
@@ -76,6 +76,14 @@ export class UsersService {
       where: {
         nickname,
         hash,
+      },
+    });
+  }
+
+  async findOneById(id: number): Promise<UserEntity | undefined> {
+    return this.prismaService.user.findUnique({
+      where: {
+        id,
       },
     });
   }

@@ -11,6 +11,7 @@ import {
   Patch,
   Param,
   Query,
+  Req,
 } from '@nestjs/common';
 
 /** constants */
@@ -47,16 +48,13 @@ export class AuthController {
     });
   }
 
+  @UseGuards(AuthGuard)
   @Patch(EAuthRoutes.Update)
-  update(
-    @Query('currentNickname') currentNickname: string,
-    @Body() { nickname }: LoginAuthDto,
-    @Ip() ip: string,
-  ) {
+  update(@Body() { nickname }: LoginAuthDto, @Req() req, @Ip() ip: string) {
     return this.authService.update({
-      currentNickname,
-      nickname,
+      id: req.user.id,
       ip,
+      nickname,
     });
   }
 

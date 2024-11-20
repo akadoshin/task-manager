@@ -31,7 +31,19 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(input: CreateUserDto): Promise<UserEntity | null> {
+  private validateUserIp(user: UserEntity, ip: string): UserEntity {
+    /**
+     * If the user is found and the IP matches,
+     * return the user
+     */
+    if (user?.ip !== ip) {
+      throw new UnauthorizedException();
+    }
+
+    return user;
+  }
+
+  async validateUser(input: CreateUserDto): Promise<UserEntity> {
     /**
      * Check if the nickname has a hash
      */
@@ -42,23 +54,11 @@ export class AuthService {
     const [nickname, hash] = input.nickname.split('#');
     const user = await this.usersService.findOne({ nickname, hash: +hash });
 
-    /**
-     * If the user is found and the IP matches,
-     * return the user
-     */
-    if (user && user.ip === input.ip) {
-      return user;
-    }
-
-    return null;
+    return this.validateUserIp(user, input.ip);
   }
 
   async authenticate(input: CreateUserDto): Promise<TAuthResult> {
     const user = await this.validateUser(input);
-
-    if (!user) {
-      throw new UnauthorizedException();
-    }
 
     return this.signIn(user);
   }
@@ -70,14 +70,9 @@ export class AuthService {
   }
 
   async update(input: UpdateUserDto): Promise<TAuthResult> {
-    const user = await this.validateUser({
-      nickname: input.currentNickname,
-      ip: input.ip,
-    });
+    const user = await this.usersService.findOneById(input.id);
 
-    if (!user) {
-      throw new UnauthorizedException();
-    }
+    this.validateUserIp(user, input.ip);
 
     const updatedUser = await this.usersService.update({
       id: user.id,

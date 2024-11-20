@@ -25,6 +25,6 @@ export class CreateUserDto implements Partial<UserEntity> {
 }
 
 export class UpdateUserDto extends CreateUserDto {
-  @IsString()
-  currentNickname: string;
+  @IsNumber()
+  id: number;
 }
