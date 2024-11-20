@@ -1,31 +1,20 @@
 import {
   Controller,
   Post,
-  Get,
   Body,
   Ip,
   HttpCode,
   HttpStatus,
-  UseGuards,
-  SetMetadata,
-  Patch,
-  Param,
-  Query,
-  Req,
 } from '@nestjs/common';
 
 /** constants */
 import { EAuthRoutes, ERoutes } from '@constants/routes.constants';
 
-/** guards */
-import { AuthGuard } from '../../common/guards/auth.guard';
-
 /** service */
 import { AuthService } from './auth.service';
 
 /** dto */
-import { LoginAuthDto } from './dto/login-auth.dto';
-import { UpdateUserDto } from '../users/dto/create-user.dto';
+import { AuthDto, TAuthResult } from './dto/login-auth.dto';
 
 @Controller(ERoutes.Auth)
 export class AuthController {
@@ -33,35 +22,18 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post(EAuthRoutes.Login)
-  login(@Body() { nickname }: LoginAuthDto, @Ip() ip: string) {
+  login(@Body() authDto: AuthDto, @Ip() ip: string): Promise<TAuthResult> {
     return this.authService.authenticate({
-      nickname,
+      ...authDto,
       ip,
     });
   }
 
   @Post(EAuthRoutes.Register)
-  register(@Body() { nickname }: LoginAuthDto, @Ip() ip: string) {
+  register(@Body() authDto: AuthDto, @Ip() ip: string): Promise<TAuthResult> {
     return this.authService.register({
-      nickname,
+      ...authDto,
       ip,
     });
-  }
-
-  @UseGuards(AuthGuard)
-  @Patch(EAuthRoutes.Update)
-  update(@Body() { nickname }: LoginAuthDto, @Req() req, @Ip() ip: string) {
-    return this.authService.update({
-      id: req.user.id,
-      ip,
-      nickname,
-    });
-  }
-
-  @UseGuards(AuthGuard)
-  @SetMetadata('allowExpired', 'true')
-  @Get(EAuthRoutes.Suggestions)
-  suggestions(@Ip() ip: string) {
-    return this.authService.suggestions(ip);
   }
 }

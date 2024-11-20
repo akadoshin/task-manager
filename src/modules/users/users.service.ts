@@ -10,6 +10,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 /** helpers */
 import { UserHelper } from '@helpers/user.helper';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -56,16 +57,39 @@ export class UsersService {
 
   async update({
     id,
+    ip,
     nickname,
-  }: Pick<UserEntity, 'nickname' | 'id'>): Promise<UserEntity> {
-    return this.prismaService.user.update({
+  }: UpdateUserDto): Promise<Pick<UserEntity, 'nickname'>> {
+    const user = await this.findOneById(id);
+
+    UserHelper.validateUserIp(user, ip);
+
+    const updatedUser = await this.prismaService.user.update({
       where: {
-        id,
+        id: user.id,
       },
       data: {
         nickname: UserHelper.normalizeNickname(nickname),
       },
     });
+
+    return new UserEntity({
+      nickname: UserHelper.getNicknameAndHash(updatedUser),
+    });
+  }
+
+  async suggestions(ip: string): Promise<string[] | null> {
+    const users = await this.prismaService.user.findMany({
+      where: {
+        ip,
+      },
+    });
+
+    if (!users?.length) {
+      return null;
+    }
+
+    return users.map(UserHelper.getNicknameAndHash);
   }
 
   async findOne({
@@ -84,14 +108,6 @@ export class UsersService {
     return this.prismaService.user.findUnique({
       where: {
         id,
-      },
-    });
-  }
-
-  async findAllByIp(ip: string): Promise<UserEntity[]> {
-    return this.prismaService.user.findMany({
-      where: {
-        ip,
       },
     });
   }

@@ -1,3 +1,7 @@
+import { UnauthorizedException } from '@nestjs/common';
+
+import { UserEntity } from '@/modules/users/entities/users.entity';
+
 export class UserHelper {
   /**
    * Normalize a nickname
@@ -15,7 +19,19 @@ export class UserHelper {
    * Get the nickname and hash of a user
    * and concatenate them
    */
-  static getNicknameAndHash<T>(user: T): string {
-    return `${user['nickname']}#${user['hash']}`;
+  static getNicknameAndHash<T extends UserEntity>(user: T): string {
+    return `${user.nickname}#${user.hash}`;
+  }
+
+  static validateUserIp<T extends UserEntity>(user: T, ip: string): T {
+    /**
+     * If the user is found and the IP matches,
+     * return the user
+     */
+    if (user?.ip !== ip) {
+      throw new UnauthorizedException();
+    }
+
+    return user;
   }
 }

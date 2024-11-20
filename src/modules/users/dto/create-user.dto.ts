@@ -1,14 +1,7 @@
-import {
-  IsIP,
-  IsNumber,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsIP, IsString, MaxLength, MinLength } from 'class-validator';
 
 /** entities */
 import { UserEntity } from '../entities/users.entity';
-import { PickType } from '@nestjs/mapped-types';
 
 export class CreateUserDto implements Partial<UserEntity> {
   @IsString()
@@ -22,9 +15,4 @@ export class CreateUserDto implements Partial<UserEntity> {
   constructor(partial: Partial<CreateUserDto> = {}) {
     Object.assign(this, partial);
   }
-}
-
-export class UpdateUserDto extends CreateUserDto {
-  @IsNumber()
-  id: number;
 }
