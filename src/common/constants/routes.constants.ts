@@ -17,6 +17,6 @@ export enum ERoutes {
 export enum EAuthRoutes {
   Login = 'login',
   Register = 'register',
-  Refresh = 'refresh',
+  Update = 'update',
   Suggestions = 'suggestions',
 }

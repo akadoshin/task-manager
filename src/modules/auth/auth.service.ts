@@ -10,7 +10,10 @@ import { UsersService } from '@/modules/users/users.service';
 
 /** dto and entities */
 import { UserEntity } from '@/modules/users/entities/users.entity';
-import { CreateUserDto } from '@/modules/users/dto/create-user.dto';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+} from '@/modules/users/dto/create-user.dto';
 
 /** helpers */
 import { UserHelper } from '@helpers/user.helper';
@@ -64,6 +67,24 @@ export class AuthService {
     const user = await this.usersService.create(input);
 
     return this.signIn(user);
+  }
+
+  async update(input: UpdateUserDto): Promise<TAuthResult> {
+    const user = await this.validateUser({
+      nickname: input.currentNickname,
+      ip: input.ip,
+    });
+
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    const updatedUser = await this.usersService.update({
+      id: user.id,
+      nickname: input.nickname,
+    });
+
+    return this.signIn(updatedUser);
   }
 
   async signIn(input: UserEntity): Promise<TAuthResult> {

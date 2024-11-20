@@ -7,6 +7,7 @@ export class UserHelper {
     return nickname
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[#\s]/g, '')
       .toLocaleLowerCase();
   }
 

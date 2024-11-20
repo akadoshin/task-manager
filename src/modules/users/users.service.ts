@@ -6,7 +6,7 @@ import { PrismaService } from '@/database/prisma/prisma.service';
 
 /** types */
 import { UserEntity } from './entities/users.entity';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 
 /** helpers */
 import { UserHelper } from '@helpers/user.helper';
@@ -52,6 +52,20 @@ export class UsersService {
         }
       }
     }
+  }
+
+  async update({
+    id,
+    nickname,
+  }: Pick<UserEntity, 'nickname' | 'id'>): Promise<UserEntity> {
+    return this.prismaService.user.update({
+      where: {
+        id,
+      },
+      data: {
+        nickname: UserHelper.normalizeNickname(nickname),
+      },
+    });
   }
 
   async findOne({

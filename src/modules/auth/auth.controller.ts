@@ -8,6 +8,9 @@ import {
   HttpStatus,
   UseGuards,
   SetMetadata,
+  Patch,
+  Param,
+  Query,
 } from '@nestjs/common';
 
 /** constants */
@@ -21,6 +24,7 @@ import { AuthService } from './auth.service';
 
 /** dto */
 import { LoginAuthDto } from './dto/login-auth.dto';
+import { UpdateUserDto } from '../users/dto/create-user.dto';
 
 @Controller(ERoutes.Auth)
 export class AuthController {
@@ -38,6 +42,19 @@ export class AuthController {
   @Post(EAuthRoutes.Register)
   register(@Body() { nickname }: LoginAuthDto, @Ip() ip: string) {
     return this.authService.register({
+      nickname,
+      ip,
+    });
+  }
+
+  @Patch(EAuthRoutes.Update)
+  update(
+    @Query('currentNickname') currentNickname: string,
+    @Body() { nickname }: LoginAuthDto,
+    @Ip() ip: string,
+  ) {
+    return this.authService.update({
+      currentNickname,
       nickname,
       ip,
     });
