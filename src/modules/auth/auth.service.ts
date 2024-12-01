@@ -19,22 +19,35 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  private async signIn(input: UserEntity): Promise<TAuthResult> {
+  private async signIn(
+    input: UserEntity,
+    response: Response,
+  ): Promise<TAuthResult> {
     const tokenPayload = {
       sub: input.id,
       nickname: UserHelper.getNicknameAndHash(input),
     };
 
     const accessToken = await this.jwtService.signAsync(tokenPayload);
+    this.setAuthCookie(accessToken, response);
 
     return {
-      accessToken,
-      userId: input.id,
       userNickname: UserHelper.getNicknameAndHash(input),
     };
   }
 
-  async authenticate(input: CreateUserDto): Promise<TAuthResult> {
+  private setAuthCookie(accessToken: string, httpResponse: any): void {
+    httpResponse?.cookie('access_token', accessToken, {
+      httpOnly: true,
+      // secure: true,
+      sameSite: 'strict',
+    });
+  }
+
+  async authenticate(
+    input: CreateUserDto,
+    response: Response,
+  ): Promise<TAuthResult> {
     /**
      * Check if the nickname has a hash
      */
@@ -47,12 +60,15 @@ export class AuthService {
 
     UserHelper.validateUserIp(user, input.ip);
 
-    return this.signIn(user);
+    return this.signIn(user, response);
   }
 
-  async register(input: CreateUserDto): Promise<TAuthResult> {
+  async register(
+    input: CreateUserDto,
+    response: Response,
+  ): Promise<TAuthResult> {
     const user = await this.usersService.create(input);
 
-    return this.signIn(user);
+    return this.signIn(user, response);
   }
 }

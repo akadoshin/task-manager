@@ -5,6 +5,7 @@ import {
   Ip,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 
 /** constants */
@@ -22,18 +23,33 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post(EAuthRoutes.Login)
-  login(@Body() authDto: AuthDto, @Ip() ip: string): Promise<TAuthResult> {
-    return this.authService.authenticate({
-      ...authDto,
-      ip,
-    });
+  login(
+    @Body() authDto: AuthDto,
+    @Ip() ip: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<TAuthResult> {
+    return this.authService.authenticate(
+      {
+        ...authDto,
+        ip,
+      },
+      response,
+    );
   }
 
+  @HttpCode(HttpStatus.CREATED)
   @Post(EAuthRoutes.Register)
-  register(@Body() authDto: AuthDto, @Ip() ip: string): Promise<TAuthResult> {
-    return this.authService.register({
-      ...authDto,
-      ip,
-    });
+  register(
+    @Body() authDto: AuthDto,
+    @Ip() ip: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<TAuthResult> {
+    return this.authService.register(
+      {
+        ...authDto,
+        ip,
+      },
+      response,
+    );
   }
 }
